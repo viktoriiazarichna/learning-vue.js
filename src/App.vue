@@ -12,8 +12,10 @@
 <!--    <br>-->
 <!--    <button @click="isOn = !isOn">toggle checkbox</button>-->
 
+    <div v-if="todo">{{todo.id}}  - {{todo.title}} - {{todo.completed}} </div>
+
     <ul v-if="todos.length">
-      <li v-for="todo of todos" :key="todo.id">{{todo.id}}  - {{todo.title}} - {{todo.completed}}    </li>
+      <li v-for="todo of todos" :key="todo.id" @click="selectedTodoId = todo.id">{{todo.id}}  - {{todo.title}} - {{todo.completed}}    </li>
     </ul>
     <h2 v-else-if="loading"> LOADING </h2>
     <h2 v-else> NO DATA </h2>
@@ -31,6 +33,8 @@ export default {
       isOn: false,
       inputValue: '',
       todos: [],
+      todo: null,
+      selectedTodoId: null,
       loading: false
 
     }
@@ -73,13 +77,27 @@ export default {
         this.loading = false
       }
 
+    },
+
+    async fetchTodo(id) {
+      try {
+        this.loading = true;
+        const res= await fetch(`https://jsonplaceholder.typicode.com/todos/${id}`);
+        this.todo = await res.json();
+
+      } catch (e) {
+        console.log(e)
+      } finally {
+        this.loading = false
+      }
+
     }
 
   },
 
   watch: {
-    inputValue() {
-      console.log(typeof this.inputValue, this.inputValue)
+    selectedTodoId() {
+      this.fetchTodo(this.selectedTodoId)
     }
   },
 
